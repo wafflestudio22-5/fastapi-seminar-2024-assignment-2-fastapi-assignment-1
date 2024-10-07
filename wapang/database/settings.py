@@ -1,6 +1,6 @@
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from wapang.settings import SETTINGS
+
 
 class DatabaseSettings(BaseSettings):
     dialect: str = ""
@@ -20,5 +20,6 @@ class DatabaseSettings(BaseSettings):
         env_prefix="DB_",
         env_file=SETTINGS.env_file,
     )
+
 
 DB_SETTINGS = DatabaseSettings()

@@ -8,6 +8,7 @@ from alembic import context
 from wapang.database.common import Base
 from wapang.database.settings import DB_SETTINGS
 
+# TODO 왜 사용되지 않는 모듈을 import 하는 걸까요? 한 번 생각해보세요.
 import wapang.app.user.models # noqa: F401
 
 # this is the Alembic Config object, which provides
