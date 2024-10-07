@@ -2,11 +2,13 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from wapang.database.settings import DB_SETTINGS
+
 
 class DatabaseManager:
     def __init__(self):
         self.engine = create_engine(
-            "",
+            DB_SETTINGS.url,
             pool_recycle=28000,
             pool_pre_ping=True,
         )
