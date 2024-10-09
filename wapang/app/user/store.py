@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from wapang.app.user.errors import EmailAlreadyExistsError, UsernameAlreadyExistsError
+from wapang.app.user.errors import EmailAlreadyExistsError, UserUnsignedError, UsernameAlreadyExistsError
 from wapang.app.user.models import User
 from wapang.database.connection import get_db_session
 
@@ -39,11 +39,11 @@ class UserStore:
     ) -> User:
         user = self.get_user_by_username(username)
         if user is None:
-            raise ValueError(f"User {username} does not exist")
+            raise UserUnsignedError()
 
         if email is not None:
             if self.get_user_by_email(email):
-                raise ValueError(f"Email {email} already exists")
+                raise EmailAlreadyExistsError()
             user.email = email
 
         if address is not None:

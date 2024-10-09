@@ -1,5 +1,9 @@
 from fastapi import HTTPException
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
+from starlette.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_409_CONFLICT,
+)
 
 
 class EmailAlreadyExistsError(HTTPException):
@@ -19,4 +23,9 @@ class InvalidFieldFormatError(HTTPException):
 
 class MissingRequiredFieldError(HTTPException):
     def __init__(self) -> None:
-        super().__init__(HTTP_400_BAD_REQUEST, "Missing required field")
+        super().__init__(HTTP_400_BAD_REQUEST, "Missing required fields")
+
+
+class UserUnsignedError(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(HTTP_401_UNAUTHORIZED, "User is not signed in")
