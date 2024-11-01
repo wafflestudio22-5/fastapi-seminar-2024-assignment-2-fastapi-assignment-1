@@ -17,7 +17,7 @@ class Store(Base):
     phone_number: Mapped[str] = mapped_column(String(20))
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
-    owner: Mapped["User"] = relationship("user", back_populates="stores")
+    owner: Mapped["User"] = relationship("User", back_populates="stores")
     items: Mapped[list["Item"]] = relationship("Item", back_populates="store")
 
 class Item(Base):

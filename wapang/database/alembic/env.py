@@ -8,9 +8,6 @@ from alembic import context
 from wapang.database.common import Base
 from wapang.database.settings import DB_SETTINGS
 
-# TODO 왜 사용되지 않는 모듈을 import 하는 걸까요? 한 번 생각해보세요.
-import wapang.app.user.models # noqa: F401
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -65,9 +62,7 @@ def run_migrations_online() -> None:
     connectable = create_engine(DB_SETTINGS.url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
