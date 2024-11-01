@@ -3,7 +3,7 @@ from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 
 from wapang.api import api_router
-from wapang.app.user.errors import MissingRequiredFieldError
+from wapang.common.errors import MissingRequiredFieldError
 
 app = FastAPI()
 
@@ -14,5 +14,5 @@ app.include_router(api_router, prefix="/api")
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     for error in exc.errors():
         if isinstance(error, dict) and error.get("type", None) == "missing":
-            return MissingRequiredFieldError()
+            raise MissingRequiredFieldError()
     return await request_validation_exception_handler(request, exc)
