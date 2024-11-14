@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class StoreCreateResponse(BaseModel):
+class StoreDetailResponse(BaseModel):
     id: int
     name: str = Field(serialization_alias="store_name")
     address: str
