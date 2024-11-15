@@ -18,7 +18,6 @@ class ItemStore:
     ) -> Item:
         item = Item(store_id=store_id, name=item_name, price=price, stock=stock)
         self.session.add(item)
-        self.session.commit()
         return item
     
     def get_item_by_id(self, item_id: int) -> Item | None:
@@ -38,7 +37,6 @@ class ItemStore:
             item.price = item_price
         if item_stock is not None:
             item.stock = item_stock
-        self.session.commit()
         return item
 
     def list_items(

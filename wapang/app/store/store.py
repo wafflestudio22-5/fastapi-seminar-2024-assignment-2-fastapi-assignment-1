@@ -27,7 +27,6 @@ class StoreStore:
             owner_id=owner_id,
         )
         self.session.add(store)
-        self.session.commit()
         return store
     
     def get_store_by_id(self, store_id: int) -> Store:
