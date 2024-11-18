@@ -10,7 +10,7 @@ from wapang.app.user.views import login_with_header
 item_router = APIRouter()
 
 
-@item_router.post("/items")
+@item_router.post("", status_code=201)
 def create_item(
     user: Annotated[User, Depends(login_with_header)],
     item: ItemCreateRequest,
@@ -19,7 +19,7 @@ def create_item(
     return item_service.create_item(user, item.item_name, item.price, item.stock)
 
 
-@item_router.patch("/items/{item_id}")
+@item_router.patch("/{item_id}", status_code=200)
 def update_item(
     user: Annotated[User, Depends(login_with_header)],
     item_id: int,
@@ -31,7 +31,7 @@ def update_item(
     )
 
 
-@item_router.get("/items")
+@item_router.get("", status_code=200)
 def get_items(
     item_service: Annotated[ItemService, Depends()],
     store_name: str | None = None,

@@ -18,6 +18,7 @@ class ItemStore:
     ) -> Item:
         item = Item(store_id=store_id, name=item_name, price=price, stock=stock)
         self.session.add(item)
+        self.session.flush()
         return item
     
     def get_item_by_id(self, item_id: int) -> Item | None:
@@ -39,25 +40,24 @@ class ItemStore:
             item.stock = item_stock
         return item
 
-    def list_items(
+    def get_items(
         self,
         store_name: str | None = None,
         max_price: int | None = None,
         min_price: int | None = None,
         in_stock: bool | None = None,
     ) -> Sequence[Item]:
-        filter_conditions = literal(True)
+        items_list_query = select(Item).options(joinedload((Item.store)))
         if store_name is not None:
-            filter_conditions &= Store.name == store_name
+            items_list_query = items_list_query.join(Store).where(Store.name == store_name)
         if max_price is not None:
-            filter_conditions &= Item.price <= max_price
+            items_list_query = items_list_query.where(Item.price <= max_price)
         if min_price is not None:
-            filter_conditions &= Item.price >= min_price
-        if in_stock is not None:
-            filter_conditions &= Item.stock > 0
+            items_list_query = items_list_query.where(Item.price >= min_price)
+        if in_stock:
+            items_list_query = items_list_query.where(Item.stock > 0)
+        return self.session.scalars(items_list_query).all()
 
-        items_list_query = (
-            select(Item).where(filter_conditions).options(joinedload((Item.store)))
-        )
-
+    def get_items_by_ids(self, item_ids: list[int]) -> Sequence[Item]:
+        items_list_query = select(Item).where(Item.id.in_(item_ids))
         return self.session.scalars(items_list_query).all()

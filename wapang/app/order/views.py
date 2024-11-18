@@ -12,7 +12,7 @@ from wapang.app.user.views import login_with_header
 order_router = APIRouter()
 
 
-@order_router.post("/orders", status_code=HTTP_201_CREATED)
+@order_router.post("", status_code=HTTP_201_CREATED)
 def place_order(
     user: Annotated[User, Depends(login_with_header)],
     order_service: Annotated[OrderService, Depends()],
@@ -21,15 +21,16 @@ def place_order(
     return order_service.place_order(user.id, place_order_request)
 
 
-@order_router.get("/orders/{order_id}", status_code=HTTP_200_OK)
+@order_router.get("/{order_id}", status_code=HTTP_200_OK)
 def search_order(
+    user: Annotated[User, Depends(login_with_header)],
     order_id: int,
     order_service: Annotated[OrderService, Depends()],
 ) -> OrderDetailResponse:
-    return order_service.search_order(order_id)
+    return order_service.search_order(user.id, order_id)
 
 
-@order_router.delete("/orders/{order_id}", status_code=HTTP_204_NO_CONTENT)
+@order_router.delete("/{order_id}", status_code=HTTP_204_NO_CONTENT)
 def cancel_order(
     user: Annotated[User, Depends(login_with_header)],
     order_id: int,
@@ -38,7 +39,7 @@ def cancel_order(
     order_service.cancel_order(user.id, order_id)
 
 
-@order_router.post("/orders/{order_id}/complete", status_code=HTTP_204_NO_CONTENT)
+@order_router.post("/{order_id}/complete", status_code=HTTP_204_NO_CONTENT)
 def confirm_order(
     user: Annotated[User, Depends(login_with_header)],
     order_id: int,

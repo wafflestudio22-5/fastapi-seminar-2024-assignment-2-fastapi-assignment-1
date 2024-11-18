@@ -30,7 +30,7 @@ class Order(Base):
     orderer_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
 
     orderer: Mapped["User"] = relationship("User", back_populates="orders")
-    order_items: Mapped[list[OrderItem]] = relationship("order_item_list")
+    order_items: Mapped[list[OrderItem]] = relationship(OrderItem)
     items: Mapped[list["Item"]] = relationship(
         secondary="order_item_list", back_populates="orders"
     )

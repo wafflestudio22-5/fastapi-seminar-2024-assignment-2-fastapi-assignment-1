@@ -3,7 +3,7 @@ from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from wapang.app.store.errors import AlreadyHasStoreError, StoreAlreadyExistsError, StoreNotFoundError
+from wapang.app.store.errors import AlreadyHasStoreError, StoreAlreadyExistsError
 from wapang.app.store.models import Store
 from wapang.database.connection import get_db_session
 
@@ -27,17 +27,21 @@ class StoreStore:
             owner_id=owner_id,
         )
         self.session.add(store)
+        self.session.flush()
         return store
     
-    def get_store_by_id(self, store_id: int) -> Store:
+    def get_store_by_id(self, store_id: int) -> Store | None:
         get_store_query = select(Store).filter(Store.id == store_id)
         store = self.session.scalar(get_store_query)
-        if not store:
-            raise StoreNotFoundError()
         return store
     
     def get_store_of_user(self, user_id: int) -> Store | None:
         get_store_query = select(Store).filter(Store.owner_id == user_id)
+        store = self.session.scalar(get_store_query)
+        return store
+    
+    def get_store_by_name(self, name: str) -> Store | None:
+        get_store_query = select(Store).filter(Store.name == name)
         store = self.session.scalar(get_store_query)
         return store
 

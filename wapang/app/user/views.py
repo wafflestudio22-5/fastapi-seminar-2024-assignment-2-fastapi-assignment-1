@@ -11,9 +11,9 @@ user_router = APIRouter()
 
 
 def login_with_header(
-    x_wapang_username: Annotated[str, Header(...)],
-    x_wapang_password: Annotated[str, Header(...)],
     user_service: Annotated[UserService, Depends()],
+    x_wapang_username: Annotated[str, Header()] = "",
+    x_wapang_password: Annotated[str, Header()] = "",
 ) -> User:
     user = user_service.get_user_by_username(x_wapang_username)
     if not user or user.password != x_wapang_password:

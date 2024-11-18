@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 from wapang.app.store.dto.responses import StoreDetailResponse
+from wapang.app.store.errors import StoreNotFoundError
 from wapang.app.store.store import StoreStore
 from wapang.app.user.models import User
 from wapang.common.errors import MissingRequiredFieldError
@@ -35,4 +36,6 @@ class StoreService:
 
     def get_store_by_id(self, store_id: int) -> StoreDetailResponse:
         store = self.store_store.get_store_by_id(store_id)
+        if store is None:
+            raise StoreNotFoundError()
         return StoreDetailResponse.model_validate(store, from_attributes=True)

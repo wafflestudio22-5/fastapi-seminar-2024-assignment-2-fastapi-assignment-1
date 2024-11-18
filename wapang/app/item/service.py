@@ -56,5 +56,9 @@ class ItemService:
         min_price: int | None = None,
         in_stock: bool | None = None,
     ) -> list[ItemDetailInListResponse]:
-        items = self.item_store.list_items(store_name, max_price, min_price, in_stock)
+        if store_name is not None:
+            store = self.store_store.get_store_by_name(store_name)
+            if store is None:
+                raise StoreNotFoundError()
+        items = self.item_store.get_items(store_name, max_price, min_price, in_stock)
         return [ItemDetailInListResponse.from_item(item) for item in items]
