@@ -25,13 +25,17 @@ class StoreService:
         phone_number = phone_number or user.phone_number
         if not name or not address or not email or not phone_number:
             raise MissingRequiredFieldError()
-        store = self.store_store.create_store(
-            name=name,
-            address=address,
-            email=email,
-            phone_number=phone_number,
-            owner_id=user.id,
-        )
+        try:
+            store = self.store_store.create_store(
+                name=name,
+                address=address,
+                email=email,
+                phone_number=phone_number,
+                owner_id=user.id,
+            )
+        except Exception as e:
+            print(e)
+            raise e
         return StoreDetailResponse.model_validate(store, from_attributes=True)
 
     def get_store_by_id(self, store_id: int) -> StoreDetailResponse:

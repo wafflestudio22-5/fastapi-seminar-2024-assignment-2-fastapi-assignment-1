@@ -11,7 +11,7 @@ from wapang.app.user.views import login_with_header
 store_router = APIRouter()
 
 
-@store_router.post("")
+@store_router.post("", status_code=201)
 def create_store(
     user: Annotated[User, Depends(login_with_header)],
     store_service: Annotated[StoreService, Depends()],
