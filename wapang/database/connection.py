@@ -1,7 +1,13 @@
-from typing import Any, Generator
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+import asyncio
+from sqlalchemy.ext.asyncio import (
+    async_scoped_session,
+    async_sessionmaker,
+    create_async_engine,
+)
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
 
+from wapang.common.utils import get_request_id
 from wapang.database.settings import DB_SETTINGS
 
 
@@ -9,24 +15,30 @@ class DatabaseManager:
     def __init__(self):
         # TODO pool 이 뭘까요?
         # pool_recycle 은 뭐고 왜 28000으로 설정해두었을까요?
-        self.engine = create_engine(
+        self.engine = create_async_engine(
             DB_SETTINGS.url,
             pool_recycle=28000,
             pool_pre_ping=True,
         )
-        self.session_factory = sessionmaker(bind=self.engine, expire_on_commit=False)
+        self.session_factory = async_sessionmaker(
+            bind=self.engine, expire_on_commit=False
+        )
 
 
-# TODO 아래 함수를 이용해서 Session 종속성을 주입받을 수 있습니다.
-# 이렇게 했을 때의 장점은 무엇일까요? 다른 방법은 없을까요?
-# 한 번 생각해보세요.
-def get_db_session() -> Generator[Session, Any, None]:
-    session = DatabaseManager().session_factory()
-    try:
-        yield session
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        raise e
-    finally:
-        session.close()
+SESSION = async_scoped_session(
+    session_factory=DatabaseManager().session_factory, scopefunc=get_request_id
+)
+
+
+class DbSessionMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
+        try:
+            response = await call_next(request)
+        except Exception as e:
+            await SESSION.rollback()
+            raise e
+        else:
+            await SESSION.commit()
+        finally:
+            await SESSION.close()
+        return response

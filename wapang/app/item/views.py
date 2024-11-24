@@ -11,32 +11,32 @@ item_router = APIRouter()
 
 
 @item_router.post("", status_code=201)
-def create_item(
+async def create_item(
     user: Annotated[User, Depends(login_with_header)],
     item: ItemCreateRequest,
     item_service: Annotated[ItemService, Depends()],
 ) -> ItemDetailResponse:
-    return item_service.create_item(user, item.item_name, item.price, item.stock)
+    return await item_service.create_item(user, item.item_name, item.price, item.stock)
 
 
 @item_router.patch("/{item_id}", status_code=200)
-def update_item(
+async def update_item(
     user: Annotated[User, Depends(login_with_header)],
     item_id: int,
     item: ItemUpdateRequest,
     item_service: Annotated[ItemService, Depends()],
 ) -> ItemDetailResponse:
-    return item_service.update_item(
+    return await item_service.update_item(
         user, item_id, item.item_name, item.price, item.stock
     )
 
 
 @item_router.get("", status_code=200)
-def get_items(
+async def get_items(
     item_service: Annotated[ItemService, Depends()],
     store_name: str | None = None,
     max_price: int | None = None,
     min_price: int | None = None,
     in_stock: bool | None = None,
 ) -> list[ItemDetailInListResponse]:
-    return item_service.list_items(store_name, max_price, min_price, in_stock)
+    return await item_service.list_items(store_name, max_price, min_price, in_stock)
