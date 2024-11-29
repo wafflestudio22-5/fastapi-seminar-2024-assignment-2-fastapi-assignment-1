@@ -4,12 +4,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from wapang.app.store.models import Store
+from wapang.database.annotation import transactional
 from wapang.database.connection import SESSION
 
 
 # 이렇게 보니까 좀 이상하네요 ㅎㅎ;
 # 보통 ~Store보다 ~Repository라는 이름을 더 많이 쓰긴 합니다.
 class StoreStore:
+    @transactional
     async def create_store(
         self, name: str, address: str, email: str, phone_number: str, owner_id: int
     ) -> Store:

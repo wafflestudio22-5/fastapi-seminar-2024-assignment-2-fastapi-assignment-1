@@ -4,10 +4,12 @@ from sqlalchemy.orm import joinedload
 
 from wapang.app.item.models import Item
 from wapang.app.store.models import Store
+from wapang.database.annotation import transactional
 from wapang.database.connection import SESSION
 
 
 class ItemStore:
+    @transactional
     async def create_item(
         self, store_id: int, item_name: str, price: int, stock: int
     ) -> Item:
@@ -20,6 +22,7 @@ class ItemStore:
         item = await SESSION.get(Item, item_id)
         return item
 
+    @transactional
     async def update_item(
         self,
         item: Item,

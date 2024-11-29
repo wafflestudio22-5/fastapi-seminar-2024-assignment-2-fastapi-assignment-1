@@ -6,10 +6,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from wapang.app.user.errors import EmailAlreadyExistsError, UserUnsignedError, UsernameAlreadyExistsError
 from wapang.app.user.models import User
+from wapang.database.annotation import transactional
 from wapang.database.connection import SESSION
 
 
 class UserStore:
+    @transactional
     async def add_user(self, username: str, password: str, email: str) -> User:
         if await self.get_user_by_username(username):
             raise UsernameAlreadyExistsError()
@@ -27,6 +29,7 @@ class UserStore:
     async def get_user_by_email(self, email: str) -> User | None:
         return await SESSION.scalar(select(User).where(User.email == email))
 
+    @transactional
     async def update_user(
         self,
         username: str,
