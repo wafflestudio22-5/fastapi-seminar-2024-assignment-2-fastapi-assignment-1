@@ -14,6 +14,7 @@ from wapang.app.order.errors import (
 )
 from wapang.app.order.store import OrderStore
 from wapang.app.user.errors import PermissionDeniedError
+from wapang.database.annotation import transactional
 
 
 class OrderService:
@@ -25,6 +26,7 @@ class OrderService:
         self.order_store = order_store
         self.item_store = item_store
 
+    @transactional
     async def place_order(
         self, user_id: int, place_order_request: PlaceOrderRequest
     ) -> OrderDetailResponse:
