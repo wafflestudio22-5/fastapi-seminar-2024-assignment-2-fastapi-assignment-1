@@ -68,3 +68,7 @@ class UserUpdateRequest(BaseModel):
     email: EmailStr | None = None
     address: Annotated[str | None, AfterValidator(validate_address)] = None
     phone_number: Annotated[str | None, AfterValidator(validate_phone_number)] = None
+
+class UserSigninRequest(BaseModel):
+    username: str
+    password: str

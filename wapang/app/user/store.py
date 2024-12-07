@@ -1,11 +1,16 @@
+from datetime import datetime
 from functools import cache
 from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from wapang.app.user.errors import EmailAlreadyExistsError, UserUnsignedError, UsernameAlreadyExistsError
-from wapang.app.user.models import User
+from wapang.app.user.errors import (
+    EmailAlreadyExistsError,
+    UserUnsignedError,
+    UsernameAlreadyExistsError,
+)
+from wapang.app.user.models import BlockedToken, User
 from wapang.database.annotation import transactional
 from wapang.database.connection import SESSION
 
@@ -53,3 +58,16 @@ class UserStore:
             user.phone_number = phone_number
 
         return user
+
+    @transactional
+    async def block_token(self, token_id: str, expired_at: datetime) -> None:
+        blocked_token = BlockedToken(token_id=token_id, expired_at=expired_at)
+        SESSION.add(blocked_token)
+
+    async def is_token_blocked(self, token_id: int) -> bool:
+        return (
+            await SESSION.scalar(
+                select(BlockedToken).where(BlockedToken.token_id == token_id)
+            )
+            is not None
+        )
