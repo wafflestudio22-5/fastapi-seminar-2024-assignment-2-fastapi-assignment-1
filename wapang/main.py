@@ -4,13 +4,13 @@ from fastapi.exceptions import RequestValidationError
 
 from wapang.api import api_router
 from wapang.common.errors import MissingRequiredFieldError
-# from wapang.database.connection import DbSessionMiddleware
+from wapang.database.middleware import DefaultSessionMiddleware
 
 app = FastAPI()
 
 app.include_router(api_router, prefix="/api")
 
-# app.add_middleware(DbSessionMiddleware)
+app.add_middleware(DefaultSessionMiddleware)
 
 
 @app.exception_handler(RequestValidationError)
