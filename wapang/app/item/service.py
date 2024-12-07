@@ -18,16 +18,18 @@ class ItemService:
         self.item_store = item_store
         self.store_store = store_store
 
-    def create_item(
+    async def create_item(
         self, user: User, item_name: str, price: int, stock: int
     ) -> ItemDetailResponse:
-        user_store = self.store_store.get_store_of_user(user.id)
+        user_store = await self.store_store.get_store_of_user(user.id)
         if user_store is None:
             raise StoreNotFoundError()
-        new_item = self.item_store.create_item(user_store.id, item_name, price, stock)
+        new_item = await self.item_store.create_item(
+            user_store.id, item_name, price, stock
+        )
         return ItemDetailResponse.from_item(new_item)
 
-    def update_item(
+    async def update_item(
         self,
         user: User,
         item_id: int,
@@ -35,21 +37,21 @@ class ItemService:
         price: int | None = None,
         stock: int | None = None,
     ) -> ItemDetailResponse:
-        user_store = self.store_store.get_store_of_user(user.id)
+        user_store = await self.store_store.get_store_of_user(user.id)
         if user_store is None:
             raise StoreNotFoundError()
 
-        item = self.item_store.get_item_by_id(item_id)
+        item = await self.item_store.get_item_by_id(item_id)
         if item is None:
             raise ItemNotFoundError()
 
         if item.store_id != user_store.id:
             raise PermissionDeniedError()
 
-        updated_item = self.item_store.update_item(item, item_name, price, stock)
+        updated_item = await self.item_store.update_item(item, item_name, price, stock)
         return ItemDetailResponse.from_item(updated_item)
 
-    def list_items(
+    async def list_items(
         self,
         store_name: str | None = None,
         max_price: int | None = None,
@@ -57,8 +59,10 @@ class ItemService:
         in_stock: bool | None = None,
     ) -> list[ItemDetailInListResponse]:
         if store_name is not None:
-            store = self.store_store.get_store_by_name(store_name)
+            store = await self.store_store.get_store_by_name(store_name)
             if store is None:
                 raise StoreNotFoundError()
-        items = self.item_store.get_items(store_name, max_price, min_price, in_stock)
+        items = await self.item_store.get_items(
+            store_name, max_price, min_price, in_stock
+        )
         return [ItemDetailInListResponse.from_item(item) for item in items]

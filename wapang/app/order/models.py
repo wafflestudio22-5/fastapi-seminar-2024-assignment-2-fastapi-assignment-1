@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 from sqlalchemy import BigInteger, ForeignKey, Enum, Integer
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from wapang.app.order.enums import OrderStatus
@@ -22,7 +23,7 @@ class OrderItem(Base):
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
-class Order(Base):
+class Order(AsyncAttrs, Base):
     __tablename__ = "order"
 
     id: Mapped[intpk] = mapped_column(BigInteger, primary_key=True)

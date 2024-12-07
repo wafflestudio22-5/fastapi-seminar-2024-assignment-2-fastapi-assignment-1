@@ -16,7 +16,7 @@ class StoreService:
     def __init__(self, store_store: Annotated[StoreStore, Depends()]):
         self.store_store = store_store
 
-    def create_store(
+    async def create_store(
         self,
         user: User,
         name: str,
@@ -30,8 +30,8 @@ class StoreService:
         if not name or not address or not email or not phone_number:
             raise MissingRequiredFieldError()
 
-        self.raise_if_store_exists(user.id, name, email, phone_number)
-        store = self.store_store.create_store(
+        await self.raise_if_store_exists(user.id, name, email, phone_number)
+        store = await self.store_store.create_store(
             name=name,
             address=address,
             email=email,
@@ -40,16 +40,16 @@ class StoreService:
         )
         return StoreDetailResponse.model_validate(store, from_attributes=True)
 
-    def get_store_by_id(self, store_id: int) -> StoreDetailResponse:
-        store = self.store_store.get_store_by_id(store_id)
+    async def get_store_by_id(self, store_id: int) -> StoreDetailResponse:
+        store = await self.store_store.get_store_by_id(store_id)
         if store is None:
             raise StoreNotFoundError()
         return StoreDetailResponse.model_validate(store, from_attributes=True)
 
-    def raise_if_store_exists(
+    async def raise_if_store_exists(
         self, owner_id: int, name: str, email: str, phone_number: str
     ) -> None:
-        store = self.store_store.get_store(owner_id, name, email, phone_number)
+        store = await self.store_store.get_store(owner_id, name, email, phone_number)
         if store is not None:
             if store.owner_id == owner_id:
                 raise AlreadyHasStoreError()

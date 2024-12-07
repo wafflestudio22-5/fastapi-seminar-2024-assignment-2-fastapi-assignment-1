@@ -1,26 +1,23 @@
-from typing import Annotated
-
-from fastapi import Depends
-from sqlalchemy import insert, update
-from sqlalchemy.orm import Session
+from sqlalchemy import insert
 
 from wapang.app.order.enums import OrderStatus
 from wapang.app.order.models import Order, OrderItem
-from wapang.database.connection import get_db_session
+from wapang.database.annotation import transactional
+from wapang.database.connection import SESSION
 
 
 class OrderStore:
-    def __init__(self, session: Annotated[Session, Depends(get_db_session)]):
-        self.session = session
-
-    def create_order(self, orderer_id: int, items: list[tuple[int, int]]) -> Order:
+    @transactional
+    async def create_order(
+        self, orderer_id: int, items: list[tuple[int, int]]
+    ) -> Order:
         order = Order(orderer_id=orderer_id, status=OrderStatus.ORDERED)
-        self.session.add(order)
+        SESSION.add(order)
         # 주문 생성 후, id를 얻기 위해 flush
-        self.session.flush()
+        await SESSION.flush()
 
         # bulk insert
-        self.session.execute(
+        await SESSION.execute(
             insert(OrderItem),
             [
                 {"order_id": order.id, "item_id": item_id, "quantity": quantity}
@@ -29,14 +26,14 @@ class OrderStore:
         )
         return order
 
-    def get_order_by_id(self, order_id: int) -> Order | None:
-        order = self.session.get(Order, order_id)
+    async def get_order_by_id(self, order_id: int) -> Order | None:
+        order = await SESSION.get(Order, order_id)
         return order
 
-    def update_order_status(self, order: Order, status: OrderStatus) -> Order | None:
-        self.session.execute(
-            update(Order)
-            .where(Order.id == order.id)
-            .values({Order.status: status})
-        )
+    @transactional
+    async def update_order_status(
+        self, order: Order, status: OrderStatus
+    ) -> Order | None:
+        order.status = status
+        await SESSION.flush()
         return order
