@@ -26,29 +26,34 @@ class DatabaseManager:
         )
 
 
-DEFAULT_SESSION_ID = "default_session_id"
-DEFAULT_SESSION_TASK = "default_session_task"
-DEFAULT_SESSION_CONTEXT = (DEFAULT_SESSION_ID, DEFAULT_SESSION_TASK)
-session_context_var: ContextVar[tuple[str, str]] = ContextVar(
-    "session_context", default=DEFAULT_SESSION_CONTEXT
+session_context_var: ContextVar[tuple[str | None, str | None]] = ContextVar(
+    "session_context", default=(None, None)
 )
 
 
-def reset_session_id(token: Token[tuple[str, str]]) -> None:
+def reset_session(token: Token) -> None:
+    """세션 컨텍스트 초기화"""
     session_context_var.reset(token)
 
 
-def set_session_id() -> Token[tuple[str, str]] | None:
-    session_id, session_task = session_context_var.get()
-    if session_id == DEFAULT_SESSION_ID or session_task != DEFAULT_SESSION_TASK:
-        current_task = asyncio.current_task()
-        if current_task is None:
-            raise RuntimeError("No current task")
-        token = session_context_var.set((str(uuid4()), current_task.get_name()))
-        return token
+def start_default_session() -> Token:
+    """DefaultSessionMiddleware 에서 단 한 번만 사용"""
+    return session_context_var.set((uuid4().hex, None))
 
 
-def get_session_id() -> str:
+def start_new_session_if_not_exists() -> Token | None:
+    """
+    트랜잭션 시작 시 새로운 세션 컨텍스트 생성
+    중첩된 트랜잭션에서는 최상위 트랜잭션에서만 새로운 세션을 생성
+    """
+    _, session_task = session_context_var.get()
+    current_task_name = asyncio.current_task().get_name()  # type: ignore
+    # 현재 태스크에서 이미 세션을 생성된 적 있는 경우 무시
+    if session_task != current_task_name:
+        return session_context_var.set((uuid4().hex, current_task_name))
+
+
+def get_session_id() -> str | None:
     return session_context_var.get()[0]
 
 
